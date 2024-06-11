@@ -14,7 +14,7 @@ image1_topic: "/camera/infra2/image_rect_raw"
 
 
 
-output_path: "/home/alexander/vins_output"
+output_path: "/home/orangepi/vins_output"
  
 cam0_calib: "left.yaml"
 cam1_calib: "right.yaml"
@@ -74,5 +74,5 @@ td : -0.05                              #时间偏移的初始值。单位。读
  
 #闭环参数
 load_previous_pose_graph : 0         #加载并重用之前的位姿图；从“pose_graph_save_path”加载
-pose_graph_save_path : "/home/alexander/vins_output/pose_graph/"  #保存和加载路径
+pose_graph_save_path : "/home/orangepi/vins_output/pose_graph/"  #保存和加载路径
 save_image : 1                   # 将图像保存在姿势图中，以便可视化；您可以通过设置0来关闭此功能

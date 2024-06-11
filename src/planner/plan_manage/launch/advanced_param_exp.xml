@@ -92,9 +92,9 @@
     <param name="grid_map/local_update_range_x"  value="5.5" /> 
     <param name="grid_map/local_update_range_y"  value="5.5" /> 
     <param name="grid_map/local_update_range_z"  value="4.5" /> 
-    <param name="grid_map/obstacles_inflation"     value="0.05" /> 
+    <param name="grid_map/obstacles_inflation"     value="0.00" /> 
     <param name="grid_map/local_map_margin" value="10"/>
-    <param name="grid_map/ground_height"        value="-0.01"/>
+    <param name="grid_map/ground_height"        value="-1.11"/>
     <!-- camera parameter -->
     <param name="grid_map/cx" value="$(arg cx)"/>
     <param name="grid_map/cy" value="$(arg cy)"/>
