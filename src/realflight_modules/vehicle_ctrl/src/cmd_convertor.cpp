@@ -10,7 +10,7 @@ ros::Publisher cmd_vel_push;
 Odom_Data_t odom_data;
 Command_Data_t cmd_data;
 
-bool debug = true;
+bool debug = false;
 
 struct Desired_State_t
 {
@@ -94,12 +94,12 @@ void calculateControl(const Desired_State_t &des,
 void process() 
 {
 	ros::Time now_time = ros::Time::now();
-  if (!odom_is_received(now_time)) {
+  if (debug && !odom_is_received(now_time)) {
     ROS_INFO("odom not received");
     return;
   }
   
-  if (!cmd_is_received(now_time)) {
+  if (debug && !cmd_is_received(now_time)) {
     ROS_INFO("cmd not received");
     return;
   }
