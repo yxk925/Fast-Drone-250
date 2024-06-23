@@ -210,14 +210,16 @@ namespace ego_planner
 
   void EGOReplanFSM::waypointCallback(const geometry_msgs::PoseStampedPtr &msg)
   {
-    if (msg->pose.position.z < -0.1)
+    if (msg->pose.position.z < -0.1) {
+      cout << "position.z = " << msg->pose.position.z << " < -0.1" << endl;
       return;
+    }
 
     cout << "Triggered!" << endl;
     // trigger_ = true;
     init_pt_ = odom_pos_;
 
-    Eigen::Vector3d end_wp(msg->pose.position.x, msg->pose.position.y, 1.0);
+    Eigen::Vector3d end_wp(msg->pose.position.x, msg->pose.position.y, 0.0);
 
     planNextWaypoint(end_wp);
   }
@@ -512,7 +514,7 @@ namespace ego_planner
       // start_yaw_(0)         = atan2(rot_x(1), rot_x(0));
       // start_yaw_(1) = start_yaw_(2) = 0.0;
 
-      bool success = planFromGlobalTraj(10); // zx-todo
+      bool success = planFromGlobalTraj(1); // zx-todo
       if (success)
       {
         changeFSMExecState(EXEC_TRAJ, "FSM");
@@ -536,7 +538,7 @@ namespace ego_planner
       }
       else
       {
-        changeFSMExecState(REPLAN_TRAJ, "FSM");
+        changeFSMExecState(WAIT_TARGET, "FSM");
       }
 
       break;
@@ -562,6 +564,7 @@ namespace ego_planner
       }
       else if ((local_target_pt_ - end_pt_).norm() < 1e-3) // close to the global target
       {
+        cout << "local_target rearched end_point" << endl;
         if (t_cur > info->duration_ - 1e-2)
         {
           have_target_ = false;
@@ -579,11 +582,13 @@ namespace ego_planner
         }
         else if ((end_pt_ - pos).norm() > no_replan_thresh_ && t_cur > replan_thresh_)
         {
+          cout << "dist:" << (end_pt_ - pos).norm() << " > no_replan_thresh_:" << no_replan_thresh_ << endl;
           changeFSMExecState(REPLAN_TRAJ, "FSM");
         }
       }
       else if (t_cur > replan_thresh_)
       {
+        cout << "t cur:" << replan_thresh_ << " > replan_thresh_:" << replan_thresh_ << endl;
         changeFSMExecState(REPLAN_TRAJ, "FSM");
       }
 
@@ -646,9 +651,15 @@ namespace ego_planner
 
     //cout << "info->velocity_traj_=" << info->velocity_traj_.get_control_points() << endl;
 
+    /*
     start_pt_ = info->position_traj_.evaluateDeBoorT(t_cur);
     start_vel_ = info->velocity_traj_.evaluateDeBoorT(t_cur);
     start_acc_ = info->acceleration_traj_.evaluateDeBoorT(t_cur);
+    */
+
+    start_pt_ = odom_pos_;
+    start_vel_ = odom_vel_;
+    start_acc_ = odom_acc_;
 
     bool success = callReboundReplan(false, false);
 
