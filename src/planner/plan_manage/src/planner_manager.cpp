@@ -182,13 +182,13 @@ namespace ego_planner
         double sample_length = 0;
         double cps_dist = pp_.ctrl_pt_dist * 1.5; // cps_dist will be divided by 1.5 in the next
         size_t id = 0;
+        point_set.clear();
         do
         {
           cps_dist /= 1.5;
-          point_set.clear();
           sample_length = 0;
           id = 0;
-          while ((id <= pseudo_arc_length.size() - 2) && sample_length <= pseudo_arc_length.back())
+          while ((id <= (pseudo_arc_length.size() - 2)) && (sample_length <= pseudo_arc_length.back()))
           {
             if (sample_length >= pseudo_arc_length[id] && sample_length < pseudo_arc_length[id + 1])
             {

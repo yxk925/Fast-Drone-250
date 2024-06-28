@@ -79,13 +79,13 @@ void GridMap::initMap(ros::NodeHandle &nh)
 
   int buffer_size = mp_.map_voxel_num_(0) * mp_.map_voxel_num_(1) * mp_.map_voxel_num_(2);
 
-  md_.occupancy_buffer_ = vector<double>(buffer_size, mp_.clamp_min_log_ - mp_.unknown_flag_);
-  md_.occupancy_buffer_inflate_ = vector<char>(buffer_size, 0);
+  md_.occupancy_buffer_ = vector<double, Eigen::aligned_allocator<double>>(buffer_size, mp_.clamp_min_log_ - mp_.unknown_flag_);
+  md_.occupancy_buffer_inflate_ = vector<char, Eigen::aligned_allocator<char>>(buffer_size, 0);
 
-  md_.count_hit_and_miss_ = vector<short>(buffer_size, 0);
-  md_.count_hit_ = vector<short>(buffer_size, 0);
-  md_.flag_rayend_ = vector<char>(buffer_size, -1);
-  md_.flag_traverse_ = vector<char>(buffer_size, -1);
+  md_.count_hit_and_miss_ = vector<short, Eigen::aligned_allocator<short>>(buffer_size, 0);
+  md_.count_hit_ = vector<short, Eigen::aligned_allocator<short>>(buffer_size, 0);
+  md_.flag_rayend_ = vector<char, Eigen::aligned_allocator<char>>(buffer_size, -1);
+  md_.flag_traverse_ = vector<char, Eigen::aligned_allocator<char>>(buffer_size, -1);
 
   md_.raycast_num_ = 0;
 
@@ -193,6 +193,11 @@ int GridMap::setCacheOccupancy(Eigen::Vector3d pos, int occ)
   posToIndex(pos, id);
   int idx_ctns = toAddress(id);
 
+  // cout << "id=" << id << ", idx="  << idx_ctns << endl;
+
+  if (idx_ctns < 0 || idx_ctns >= md_.count_hit_and_miss_.size()) {
+    return INVALID_IDX;
+  }
   md_.count_hit_and_miss_[idx_ctns] += 1;
 
   if (md_.count_hit_and_miss_[idx_ctns] == 1)
@@ -336,12 +341,10 @@ void GridMap::raycastProcess()
   if (md_.proj_points_cnt == 0)
     return;
 
-  ros::Time t1, t2;
-
   md_.raycast_num_ += 1;
 
-  int vox_idx;
-  double length;
+  int vox_idx = INVALID_IDX;
+  double length = 0;
 
   // bounding box of updated region
   double min_x = mp_.map_max_boundary_(0);
@@ -658,6 +661,7 @@ void GridMap::updateOccupancyCallback(const ros::TimerEvent & /*event*/)
         ros::Time::now().toSec(), md_.last_occ_update_time_.toSec(), mp_.odom_depth_timeout_);
       md_.flag_depth_odom_timeout_ = true;
     }
+
     return;
   }
   md_.last_occ_update_time_ = ros::Time::now();
@@ -736,6 +740,7 @@ void GridMap::odomCallback(const nav_msgs::OdometryConstPtr &odom)
   md_.camera_pos_(2) = odom->pose.pose.position.z;
 
   md_.has_odom_ = true;
+  md_.flag_depth_odom_timeout_ = false;
 }
 
 void GridMap::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &img)

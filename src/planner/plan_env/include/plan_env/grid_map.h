@@ -44,7 +44,7 @@ struct matrix_hash : std::unary_function<T, size_t> {
 // constant parameters
 
 struct MappingParameters {
-
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   /* map properties */
   Eigen::Vector3d map_origin_, map_size_;
   Eigen::Vector3d map_min_boundary_, map_max_boundary_;  // map range in pos
@@ -88,10 +88,11 @@ struct MappingParameters {
 // intermediate mapping data for fusion
 
 struct MappingData {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   // main map data, occupancy of each voxel and Euclidean distance
 
-  std::vector<double> occupancy_buffer_;
-  std::vector<char> occupancy_buffer_inflate_;
+  std::vector<double, Eigen::aligned_allocator<double>> occupancy_buffer_;
+  std::vector<char, Eigen::aligned_allocator<char>> occupancy_buffer_inflate_;
 
   // camera position and pose data
 
@@ -117,13 +118,13 @@ struct MappingData {
 
   // depth image projected point cloud
 
-  vector<Eigen::Vector3d> proj_points_;
+  vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> proj_points_;
   int proj_points_cnt;
 
   // flag buffers for speeding up raycasting
 
-  vector<short> count_hit_, count_hit_and_miss_;
-  vector<char> flag_traverse_, flag_rayend_;
+  vector<short, Eigen::aligned_allocator<short>> count_hit_, count_hit_and_miss_;
+  vector<char, Eigen::aligned_allocator<char>> flag_traverse_, flag_rayend_;
   char raycast_num_;
   queue<Eigen::Vector3i> cache_voxel_;
 
@@ -135,12 +136,11 @@ struct MappingData {
 
   double fuse_time_, max_fuse_time_;
   int update_num_;
-
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 class GridMap {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   GridMap() {}
   ~GridMap() {}
 
@@ -185,9 +185,6 @@ public:
   bool getOdomDepthTimeout() { return md_.flag_depth_odom_timeout_; }
 
   typedef std::shared_ptr<GridMap> Ptr;
-
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
 private:
   MappingParameters mp_;
   MappingData md_;
