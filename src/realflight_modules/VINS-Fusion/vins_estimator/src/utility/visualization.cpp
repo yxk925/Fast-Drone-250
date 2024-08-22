@@ -153,12 +153,19 @@ void pubOdometry(const Estimator &estimator, const std_msgs::Header &header)
     {
         nav_msgs::Odometry odometry;
         odometry.header = header;
-        odometry.header.frame_id = "odom";
+        odometry.header.frame_id = "world";
         odometry.child_frame_id = "base_footprint";
+        Quaterniond verse_optical = 
+                    AngleAxisd(0.5*M_PI, Vector3d::UnitX())
+                    * AngleAxisd(0*M_PI,  Vector3d::UnitY())
+                    * AngleAxisd(0.5*M_PI, Vector3d::UnitZ());
+                    
         Quaterniond tmp_Q;
         tmp_Q = Quaterniond(estimator.Rs[WINDOW_SIZE]);
-        odometry.pose.pose.position.x = estimator.Ps[WINDOW_SIZE].y();
-        odometry.pose.pose.position.y = estimator.Ps[WINDOW_SIZE].x();
+        tmp_Q = tmp_Q * verse_optical;
+
+        odometry.pose.pose.position.x = estimator.Ps[WINDOW_SIZE].x();
+        odometry.pose.pose.position.y = estimator.Ps[WINDOW_SIZE].y();
         odometry.pose.pose.position.z = estimator.Ps[WINDOW_SIZE].z();
         odometry.pose.pose.orientation.x = tmp_Q.x();
         odometry.pose.pose.orientation.y = tmp_Q.y();
@@ -174,7 +181,7 @@ void pubOdometry(const Estimator &estimator, const std_msgs::Header &header)
         pose_stamped.header.frame_id = "world";
         pose_stamped.pose = odometry.pose.pose;
         path.header = header;
-        path.header.frame_id = "body";
+        path.header.frame_id = "world";
         path.poses.push_back(pose_stamped);
         pub_path.publish(path);
 
