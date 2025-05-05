@@ -71,23 +71,35 @@ void calculateControl(const Desired_State_t &des,
     const Odom_Data_t &odom,
     geometry_msgs::Twist &t) 
 {
+  const float PI = 3.1415926;
   double yaw_odom = fromQuaternion2yaw(odom.q);
   double x = des.v.x();
   double y = des.v.y();
   double yaw_cmd = atan2(y ,x);
-  double theta = yaw_cmd - 3.1415926 / 2 - yaw_odom;
+  double yaw_robot = yaw_odom + PI / 2;
+  double theta = yaw_cmd - yaw_robot;
+  theta = std::fmod(theta, 2*PI);
 
   double v = std::sqrt(std::pow(x, 2) + std::pow(y, 2));
 
   double sin = std::sin(theta);
   double cos = std::cos(theta);
 
+  double threshod = PI / 6;
   t.linear.x = 1 *  v * cos;
   t.angular.z = 3 *  v * sin;
+  // Rotate on the spot if the commanded angle is greater than 30 degrees.
+  if (abs(theta) > threshod  && abs(theta) < (PI * 2 -  threshod)) {
+    t.linear.x = 0;
+  }
+
+  if (abs(theta) > PI/2 && abs(theta) < 3*PI/2) {
+    t.angular.z = 3 *  v * (sin / abs(sin));
+  }
 
   if (debug) {
-    ROS_INFO("cmd_v:(%f, %f) \t\tyaw_odom:%f \tyaw_cmd:%f \ttheta:%f",
-      x, y, yaw_odom, yaw_cmd, theta);
+    ROS_INFO("cmd_v:(%f, %f) \tyaw_odom:%f yaw_robot:%f yaw_cmd:%f theta:%f t.linear.x:%f t.angular.z:%f",
+      x, y, yaw_odom, yaw_robot, yaw_cmd, theta, t.linear.x, t.angular.z);
   }
 }
 
@@ -100,7 +112,7 @@ void process()
   }
   
   if (debug && !cmd_is_received(now_time)) {
-    ROS_INFO("cmd not received");
+    // ROS_INFO("cmd not received");
     return;
   }
   geometry_msgs::Twist cmd_vel;
