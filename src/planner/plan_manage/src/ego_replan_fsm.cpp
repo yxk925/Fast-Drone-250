@@ -210,6 +210,7 @@ namespace ego_planner
 
   void EGOReplanFSM::waypointCallback(const geometry_msgs::PoseStampedPtr &msg)
   {
+    cout << "waypointCallback:" << msg->pose.position << endl;
     if (msg->pose.position.z < -0.1) {
       cout << "position.z = " << msg->pose.position.z << " < -0.1" << endl;
       return;
