@@ -188,7 +188,7 @@ namespace ego_planner
           cps_dist /= 1.5;
           sample_length = 0;
           id = 0;
-          while ((id <= (pseudo_arc_length.size() - 2)) && (sample_length <= pseudo_arc_length.back()))
+          while (((id + 2) <= pseudo_arc_length.size()) && (sample_length <= pseudo_arc_length.back()))
           {
             if (sample_length >= pseudo_arc_length[id] && sample_length < pseudo_arc_length[id + 1])
             {
