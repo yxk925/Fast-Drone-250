@@ -11,7 +11,7 @@
 
 using namespace ros;
 using namespace Eigen;
-ros::Publisher pub_odometry, pub_latest_odometry;
+ros::Publisher pub_odometry, pub_latest_odometry, pub_odometry_std;
 ros::Publisher pub_path;
 ros::Publisher pub_point_cloud, pub_margin_cloud;
 ros::Publisher pub_key_poses;
@@ -36,6 +36,7 @@ void registerPub(ros::NodeHandle &n)
     pub_latest_odometry = n.advertise<nav_msgs::Odometry>("imu_propagate", 1000);
     pub_path = n.advertise<nav_msgs::Path>("path", 1000);
     pub_odometry = n.advertise<nav_msgs::Odometry>("odometry", 1000);
+    pub_odometry_std = n.advertise<nav_msgs::Odometry>("odometry_std", 1000);
     pub_point_cloud = n.advertise<sensor_msgs::PointCloud>("point_cloud", 1000);
     pub_margin_cloud = n.advertise<sensor_msgs::PointCloud>("margin_cloud", 1000);
     pub_key_poses = n.advertise<visualization_msgs::Marker>("key_poses", 1000);
@@ -162,7 +163,6 @@ void pubOdometry(const Estimator &estimator, const std_msgs::Header &header)
                     
         Quaterniond tmp_Q;
         tmp_Q = Quaterniond(estimator.Rs[WINDOW_SIZE]);
-        tmp_Q = tmp_Q * verse_optical;
 
         odometry.pose.pose.position.x = estimator.Ps[WINDOW_SIZE].x();
         odometry.pose.pose.position.y = estimator.Ps[WINDOW_SIZE].y();
@@ -176,6 +176,7 @@ void pubOdometry(const Estimator &estimator, const std_msgs::Header &header)
         odometry.twist.twist.linear.z = estimator.Vs[WINDOW_SIZE].z();
         pub_odometry.publish(odometry);
 
+
         geometry_msgs::PoseStamped pose_stamped;
         pose_stamped.header = header;
         pose_stamped.header.frame_id = "world";
@@ -185,6 +186,18 @@ void pubOdometry(const Estimator &estimator, const std_msgs::Header &header)
         path.poses.push_back(pose_stamped);
         pub_path.publish(path);
 
+        nav_msgs::Odometry odometry_std = odometry;
+        odometry_std.header.frame_id = "world";
+        odometry_std.child_frame_id = "base_footprint";
+        Quaterniond std_odom_q = tmp_Q 
+            * verse_optical;
+        odometry_std.pose.pose.orientation.x = std_odom_q.x();
+        odometry_std.pose.pose.orientation.y = std_odom_q.y();
+        odometry_std.pose.pose.orientation.z = std_odom_q.z();
+        odometry_std.pose.pose.orientation.w = std_odom_q.w();
+            
+        pub_odometry_std.publish(odometry_std);
+        
         // write result to file
         ofstream fout(VINS_RESULT_PATH, ios::app);
 
