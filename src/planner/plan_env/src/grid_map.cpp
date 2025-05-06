@@ -604,14 +604,14 @@ void GridMap::clearAndInflateLocalMap()
 
   // inflate occupied voxels to compensate robot size
   Eigen::Vector3i inf_step;
-  for(int i = 0; i < 3; ++i) {
-    inf_step[i] = ceil(mp_.obstacles_inflation_(i) / mp_.resolution_);
+  for(int i = 0; i < 3; i++) {
+    inf_step(i) = ceil(mp_.obstacles_inflation_(i) / mp_.resolution_);
   }
 
   // int inf_step_z = 1;
-  vector<Eigen::Vector3i> inf_pts((2 * inf_step(0) + 1,
-                                   2 * inf_step(1) + 1,
-                                   2 * inf_step(2) + 1));
+  vector<Eigen::Vector3i> inf_pts((2 * inf_step(0) + 1) *
+                                   (2 * inf_step(1) + 1) *
+                                   (2 * inf_step(2) + 1));
 
   // inf_pts.resize(4 * inf_step + 3);
   Eigen::Vector3i inf_pt;
@@ -779,7 +779,7 @@ void GridMap::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &img)
 
   Eigen::Vector3i inf_step;
   for(int i = 0; i < 3; ++i) {
-    inf_step[i] = ceil(mp_.obstacles_inflation_(i) / mp_.resolution_);
+    inf_step(i) = ceil(mp_.obstacles_inflation_(i) / mp_.resolution_);
   }
 
   int inf_step_z = 1;
