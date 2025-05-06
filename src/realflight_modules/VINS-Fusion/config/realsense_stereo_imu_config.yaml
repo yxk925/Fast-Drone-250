@@ -10,7 +10,15 @@ imu_topic: "/imu/data"
 image0_topic: "/camera/infra1/image_rect_raw"
 image1_topic: "/camera/infra2/image_rect_raw"
 
-
+use_odometry: true
+odometry_topic: "/diffbot/mobile_base_controller/odom"
+odom_covariance: [
+   0.01, 0, 0, # x方向方差小，y/z方向方差大（不信任）
+   0, 100, 0, 
+   0, 0, 100,   
+   0.03, 0, 0, # yaw方差小，roll/pitch方差大
+   0, 100, 0, 
+   0, 0, 0.01 ]
 
 
 
