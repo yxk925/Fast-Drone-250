@@ -16,7 +16,9 @@ void GridMap::initMap(ros::NodeHandle &nh)
   node_.param("grid_map/local_update_range_x", mp_.local_update_range_(0), -1.0);
   node_.param("grid_map/local_update_range_y", mp_.local_update_range_(1), -1.0);
   node_.param("grid_map/local_update_range_z", mp_.local_update_range_(2), -1.0);
-  node_.param("grid_map/obstacles_inflation", mp_.obstacles_inflation_, -1.0);
+  node_.param("grid_map/obstacles_inflation_x", mp_.obstacles_inflation_(0), -1.0);
+  node_.param("grid_map/obstacles_inflation_y", mp_.obstacles_inflation_(1), -1.0);
+  node_.param("grid_map/obstacles_inflation_z", mp_.obstacles_inflation_(2), -1.0);
 
   node_.param("grid_map/fx", mp_.fx_, -1.0);
   node_.param("grid_map/fy", mp_.fy_, -1.0);
@@ -601,10 +603,16 @@ void GridMap::clearAndInflateLocalMap()
     }
 
   // inflate occupied voxels to compensate robot size
+  Eigen::Vector3i inf_step;
+  for(int i = 0; i < 3; ++i) {
+    inf_step[i] = ceil(mp_.obstacles_inflation_(i) / mp_.resolution_);
+  }
 
-  int inf_step = ceil(mp_.obstacles_inflation_ / mp_.resolution_);
   // int inf_step_z = 1;
-  vector<Eigen::Vector3i> inf_pts(pow(2 * inf_step + 1, 3));
+  vector<Eigen::Vector3i> inf_pts((2 * inf_step(0) + 1,
+                                   2 * inf_step(1) + 1,
+                                   2 * inf_step(2) + 1));
+
   // inf_pts.resize(4 * inf_step + 3);
   Eigen::Vector3i inf_pt;
 
@@ -769,7 +777,11 @@ void GridMap::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &img)
   pcl::PointXYZ pt;
   Eigen::Vector3d p3d, p3d_inf;
 
-  int inf_step = ceil(mp_.obstacles_inflation_ / mp_.resolution_);
+  Eigen::Vector3i inf_step;
+  for(int i = 0; i < 3; ++i) {
+    inf_step[i] = ceil(mp_.obstacles_inflation_(i) / mp_.resolution_);
+  }
+
   int inf_step_z = 1;
 
   double max_x, max_y, max_z, min_x, min_y, min_z;
@@ -796,8 +808,8 @@ void GridMap::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &img)
     {
 
       /* inflate the point */
-      for (int x = -inf_step; x <= inf_step; ++x)
-        for (int y = -inf_step; y <= inf_step; ++y)
+      for (int x = -inf_step(0); x <= inf_step(0); ++x)
+        for (int y = -inf_step(1); y <= inf_step(1); ++y)
           for (int z = -inf_step_z; z <= inf_step_z; ++z)
           {
 

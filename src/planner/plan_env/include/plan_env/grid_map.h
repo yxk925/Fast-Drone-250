@@ -51,7 +51,7 @@ struct MappingParameters {
   Eigen::Vector3i map_voxel_num_;                        // map range in index
   Eigen::Vector3d local_update_range_;
   double resolution_, resolution_inv_;
-  double obstacles_inflation_;
+  Eigen::Vector3d obstacles_inflation_;
   string frame_id_;
   int pose_type_;
 
@@ -369,7 +369,7 @@ inline void GridMap::indexToPos(const Eigen::Vector3i& id, Eigen::Vector3d& pos)
   for (int i = 0; i < 3; ++i) pos(i) = (id(i) + 0.5) * mp_.resolution_ + mp_.map_origin_(i);
 }
 
-inline void GridMap::inflatePoint(const Eigen::Vector3i& pt, int step, vector<Eigen::Vector3i>& pts) {
+inline void GridMap::inflatePoint(const Eigen::Vector3i& pt, Eigen::Vector3i step, vector<Eigen::Vector3i>& pts) {
   int num = 0;
 
   /* ---------- + shape inflate ---------- */
@@ -391,9 +391,9 @@ inline void GridMap::inflatePoint(const Eigen::Vector3i& pt, int step, vector<Ei
   // }
 
   /* ---------- all inflate ---------- */
-  for (int x = -step; x <= step; ++x)
-    for (int y = -step; y <= step; ++y)
-      for (int z = -step; z <= step; ++z) {
+  for (int x = -step(0); x <= step(0); ++x)
+    for (int y = -step(1); y <= step(1); ++y)
+      for (int z = -step(2); z <= step(2); ++z) {
         pts[num++] = Eigen::Vector3i(pt(0) + x, pt(1) + y, pt(2) + z);
       }
 }
