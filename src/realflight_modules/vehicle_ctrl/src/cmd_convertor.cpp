@@ -106,13 +106,13 @@ void calculateControl(const Desired_State_t &des,
 void process() 
 {
 	ros::Time now_time = ros::Time::now();
-  if (debug && !odom_is_received(now_time)) {
+  if (!odom_is_received(now_time)) {
     ROS_INFO("odom not received");
     return;
   }
   
-  if (debug && !cmd_is_received(now_time)) {
-    // ROS_INFO("cmd not received");
+  if (!cmd_is_received(now_time)) {
+    ROS_INFO("cmd not received");
     return;
   }
   geometry_msgs::Twist cmd_vel;
